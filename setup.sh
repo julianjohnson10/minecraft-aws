@@ -4,7 +4,7 @@
 
 # --- Configuration ---
 MC_VERSION="1.20.4"
-RAM_ALLOCATION="4G"
+RAM_ALLOCATION="3G"
 INSTALL_DIR="/opt/minecraft"
 EULA_ACCEPTED="true"
 SERVER_PROPERTIES_FILE="${INSTALL_DIR}/server.properties"
@@ -19,7 +19,7 @@ sudo mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
 # Download the Minecraft server JAR file
-wget "https://piston-data.mojang.com/v1/objects/8dd1a280153a52e9e917343c99f8627c73c37f15/server.jar" -O server.jar
+wget "https://piston-data.mojang.com/v1/objects/4707d00eb834b446575d89a61a11b5d548d8c001/server.jar" -O server.jar
 FIRST_RUN_COMMAND="java -Xmx${RAM_ALLOCATION} -Xms${RAM_ALLOCATION} -jar server.jar nogui"
 
 $FIRST_RUN_COMMAND

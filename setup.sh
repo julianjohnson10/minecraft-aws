@@ -12,7 +12,7 @@ SERVER_PROPERTIES_FILE="${INSTALL_DIR}/server.properties"
 
 # Update package lists and install necessary dependencies (Amazon Linux 2)
 sudo yum update -y
-sudo yum install -y java-17-amazon-openjdk-devel screen wget
+sudo yum install -y java-21-amazon-corretto-devel screen wget
 
 # Create the installation directory
 sudo mkdir -p "$INSTALL_DIR"

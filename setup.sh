@@ -18,7 +18,7 @@ cd "$INSTALL_DIR"
 
 # Download the latest BDS (replace with the actual download link)
 # You MUST get the latest link from the minecraft website.
-BEDROCK_DOWNLOAD_LINK=$(wget -qO- "https://www.minecraft.net/en-us/download/server/bedrock" | grep -oE 'https://.*bedrock-server.*\.zip')
+BEDROCK_DOWNLOAD_LINK=$(wget -qO- "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.62.01.zip")
 
 if [[ -z "$BEDROCK_DOWNLOAD_LINK" ]]; then
         echo "Error: Could not find download link."

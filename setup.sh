@@ -1,55 +1,52 @@
 #!/bin/bash
 
-# Script to download and set up a Minecraft server on an EC2 instance (Amazon Linux 2)
+# Script to download and start a Minecraft Bedrock Dedicated Server (BDS) on Ubuntu
 
 # --- Configuration ---
-MC_VERSION="1.20.4"
-RAM_ALLOCATION="3G"
-INSTALL_DIR="/opt/minecraft"
-EULA_ACCEPTED="true"
-SERVER_PROPERTIES_FILE="${INSTALL_DIR}/server.properties"
+INSTALL_DIR="/opt/bedrock"  # Installation directory
+SERVER_PORT="19132"       # Server port
+SCREEN_NAME="bedrock"      # Screen session name
 # --- End Configuration ---
 
-# Update package lists and install necessary dependencies (Amazon Linux 2)
-sudo yum update -y
-sudo yum install -y java-21-amazon-corretto-devel screen wget
+# Update package lists and install necessary dependencies
+sudo apt update -y
+sudo apt install -y wget unzip libstdc++6 screen
 
 # Create the installation directory
 sudo mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
-# Download the Minecraft server JAR file
-wget "https://piston-data.mojang.com/v1/objects/4707d00eb834b446575d89a61a11b5d548d8c001/server.jar" -O server.jar
-FIRST_RUN_COMMAND="java -Xmx${RAM_ALLOCATION} -Xms${RAM_ALLOCATION} -jar server.jar nogui"
+# Download the latest BDS (replace with the actual download link)
+# You MUST get the latest link from the minecraft website.
+BEDROCK_DOWNLOAD_LINK=$(wget -qO- "https://www.minecraft.net/en-us/download/server/bedrock" | grep -oE 'https://.*bedrock-server.*\.zip')
 
-$FIRST_RUN_COMMAND
-
-if [ "$EULA_ACCEPTED" = "true" ]; then
-  echo "eula=$EULA_ACCEPTED" > eula.txt
-else
-  echo "Please edit eula.txt and set eula=true to continue."
-  exit 1
+if [[ -z "$BEDROCK_DOWNLOAD_LINK" ]]; then
+        echo "Error: Could not find download link."
+        exit 1
 fi
 
-if [[ -f "$SERVER_PROPERTIES_FILE" ]]; then
-  sudo sed -i 's/^enable-query=false/enable-query=true/' "$SERVER_PROPERTIES_FILE"
-  sudo sed -i 's/^enable-rcon=false/enable-rcon=true/' "$SERVER_PROPERTIES_FILE"
-  RCON_PASSWORD=$(openssl rand -base64 32)
-  sudo sed -i "s/^rcon.password=/rcon.password=$RCON_PASSWORD/" "$SERVER_PROPERTIES_FILE"
-  sudo sed -i 's/^rcon.port=25575/rcon.port=25575/' "$SERVER_PROPERTIES_FILE"
-  echo "RCON Password: $RCON_PASSWORD"
-else
-  echo "server.properties file not found. First run failed?"
-  exit 1
+wget "$BEDROCK_DOWNLOAD_LINK" -O bedrock-server.zip
+
+# Extract the server files
+unzip bedrock-server.zip
+
+# Configure server.properties (example)
+if [[ ! -f "server.properties" ]]; then
+  echo "server-name=My Bedrock Server" > server.properties
+  echo "server-port=$SERVER_PORT" >> server.properties
+  echo "gamemode=survival" >> server.properties
+  echo "difficulty=normal" >> server.properties
+  echo "online-mode=true" >> server.properties
 fi
 
-sudo screen -S minecraft -dm $FIRST_RUN_COMMAND
+# Start the server in a screen session
+screen -dmS "$SCREEN_NAME" ./bedrock_server
 
-echo "Minecraft server setup complete. Access it via screen -r minecraft"
-echo "To stop the server, use 'screen -r minecraft' then type 'stop'."
+echo "Minecraft Bedrock server started in screen session '$SCREEN_NAME'."
+echo "To attach to the session, use 'screen -r $SCREEN_NAME'."
+echo "To stop the server, attach to the screen session and type 'stop'."
 
-# Security group examples (AWS CLI required)
-# AWS_SECURITY_GROUP_ID="sg-xxxxxxxxxxxxxxxxx"
-# aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 25565 --cidr 0.0.0.0/0
-# aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol udp --port 25565 --cidr 0.0.0.0/0
-# aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 25575 --cidr 0.0.0.0/0
+# Example: Open necessary port in AWS Security Group (replace with your security group ID)
+# Note: This requires AWS CLI to be configured. You may also do this through the AWS console.
+# AWS_SECURITY_GROUP_ID="sg-xxxxxxxxxxxxxxxxx" #Replace with your security group ID.
+# aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol udp --port $SERVER_PORT --cidr 0.0.0.0/0

@@ -16,13 +16,17 @@ sudo apt install -y wget unzip libstdc++6 screen
 sudo mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
-# Download the latest BDS (replace with the actual download link)
-# You MUST get the latest link from the minecraft website.
-BEDROCK_DOWNLOAD_LINK=$(wget -qO- "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.62.01.zip")
+# URL of the file to download
+url="https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.62.01.zip"
 
-if [[ -z "$BEDROCK_DOWNLOAD_LINK" ]]; then
-        echo "Error: Could not find download link."
-        exit 1
+# Download the file
+wget "$url" -O bedrock-server-1.21.62.01.zip
+
+# Verify the download
+if [[ -f "bedrock-server-1.21.62.01.zip" ]]; then
+    echo "Download successful!"
+else
+    echo "Download failed."
 fi
 
 wget "$BEDROCK_DOWNLOAD_LINK" -O bedrock-server.zip
